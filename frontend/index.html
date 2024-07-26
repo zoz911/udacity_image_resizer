@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Resizer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Image Resizer</h1>
+
+    <form id="resizeForm">
+        <input type="file" name="image" accept="image/jpeg" required>
+        <input type="number" name="width" placeholder="Width" required>
+        <input type="number" name="height" placeholder="Height" required>
+        <button type="submit">Resize</button>
+    </form>
+
+    <form id="uploadForm">
+        <input type="file" name="image" accept="image/jpeg" required>
+        <button type="submit">Upload New Image</button>
+    </form>
+
+    <div id="resizedImages"></div>
+    <div id="gallery"></div>
+    <div id="imageUrl"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
