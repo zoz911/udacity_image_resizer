@@ -6,8 +6,14 @@ export async function resizeImage(
   outputPath: string,
   width: number,
   height: number
-): Promise<void> {
+): Promise<string> {
+  const parsedPath = path.parse(outputPath);
+  const outputFilename = `${parsedPath.name}-${width}x${height}${parsedPath.ext}`;
+  const outputPathWithDimensions = path.join(parsedPath.dir, outputFilename);
+
   await sharp(inputPath)
     .resize(width, height)
-    .toFile(outputPath);
+    .toFile(outputPathWithDimensions);
+
+  return outputFilename;
 }

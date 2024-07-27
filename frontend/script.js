@@ -2,73 +2,63 @@ document.addEventListener('DOMContentLoaded', () => {
     const resizeForm = document.querySelector('#resizeForm');
     const uploadForm = document.querySelector('#uploadForm');
     const galleryContainer = document.querySelector('#gallery');
-    const imageUrlContainer = document.querySelector('#imageUrl');
+    const lastResizedImageLink = document.querySelector('#lastResizedImageLink');
 
-    // Handle form submission for resizing
-    if (resizeForm) {
-        resizeForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const formData = new FormData(resizeForm);
+    let selectedImage = null;
 
-            try {
-                const response = await fetch('http://localhost:3000/api/resize', {
-                    method: 'POST',
-                    body: formData
-                });
+    resizeForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(resizeForm);
+        formData.append('filename', selectedImage);
 
-                if (!response.ok) {
-                    throw new Error('Failed to resize image');
-                }
+        try {
+            const response = await fetch('http://localhost:3000/api/resize', {
+                method: 'POST',
+                body: formData
+            });
 
-                const data = await response.json();
-                const resizedImageUrl = data.resizedImagePath;
-
-                // Show the resized image
-                displayImage(resizedImageUrl);
-
-                // Optionally, show URL
-                document.querySelector('#imageUrl').textContent = resizedImageUrl;
-
-            } catch (error) {
-                console.error('Error resizing image:', error);
-                alert('Failed to resize image. Please try again.');
+            if (!response.ok) {
+                throw new Error('Failed to resize image');
             }
-        });
-    }
 
-    // Handle form submission for uploading
-    if (uploadForm) {
-        uploadForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const formData = new FormData(uploadForm);
+            const data = await response.json();
+            const resizedImageUrl = `http://localhost:3000/resized/${encodeURIComponent(data.filename)}`;
 
-            try {
-                const response = await fetch('http://localhost:3000/api/upload', {
-                    method: 'POST',
-                    body: formData
-                });
+            lastResizedImageLink.href = resizedImageUrl;
+            lastResizedImageLink.textContent = `Image: ${data.filename} (${data.width}x${data.height})`;
+            localStorage.setItem('lastResizedImageUrl', resizedImageUrl);
 
-                if (!response.ok) {
-                    throw new Error('Failed to upload image');
-                }
+            fetchGallery();
+        } catch (error) {
+            console.error('Error resizing image:', error);
+            alert('Failed to resize image. Please try again.');
+        }
+    });
 
-                const data = await response.json();
-                const uploadedImageUrl = data.imageUrl;
+    uploadForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(uploadForm);
 
-                // Optionally, show URL
-                document.querySelector('#imageUrl').textContent = uploadedImageUrl;
+        try {
+            const response = await fetch('http://localhost:3000/upload', {
+                method: 'POST',
+                body: formData
+            });
 
-                // Refresh gallery after upload
-                fetchGallery();
-
-            } catch (error) {
-                console.error('Error uploading image:', error);
-                alert('Failed to upload image. Please try again.');
+            if (!response.ok) {
+                throw new Error('Failed to upload image');
             }
-        });
-    }
 
-    // Fetch gallery images
+            const data = await response.json();
+            alert('Image uploaded successfully');
+            addImageToGallery(data.file.filename);
+            fetchGallery();
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            alert('Failed to upload image. Please try again.');
+        }
+    });
+
     async function fetchGallery() {
         try {
             const response = await fetch('http://localhost:3000/api/gallery');
@@ -77,31 +67,43 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const images = await response.json();
-            galleryContainer.innerHTML = ''; // Clear existing images
+            galleryContainer.innerHTML = '';
 
             images.forEach(image => {
                 const imgElement = document.createElement('img');
-                imgElement.src = `http://localhost:3000/${image.path}`; // Assuming `path` is in response
+                imgElement.src = `http://localhost:3000/resized/${encodeURIComponent(image.filename)}`;
                 imgElement.alt = image.filename;
                 imgElement.classList.add('thumbnail');
+                imgElement.onclick = () => selectImage(image.filename);
                 galleryContainer.appendChild(imgElement);
             });
-
         } catch (error) {
             console.error('Error fetching gallery:', error);
             alert('Failed to fetch gallery. Please try again.');
         }
     }
 
-    // Initial fetch for gallery
     fetchGallery();
 
-    // Function to display image
-    function displayImage(url) {
-        const imgElement = document.createElement('img');
-        imgElement.src = url;
-        imgElement.alt = 'Resized Image';
-        imgElement.classList.add('resized-image');
-        document.querySelector('#resizedImages').appendChild(imgElement);
+    function addImageToGallery(filename) {
+        const gallery = document.getElementById('gallery');
+        const img = document.createElement('img');
+        img.src = `http://localhost:3000/uploads/${encodeURIComponent(filename)}`;
+        img.onclick = () => selectImage(filename);
+        gallery.appendChild(img);
+    }
+
+    function selectImage(filename) {
+        selectedImage = filename;
+        const images = document.querySelectorAll('#gallery img');
+        images.forEach((img) => img.classList.remove('selected'));
+        const selectedImg = Array.from(images).find((img) => img.src.includes(encodeURIComponent(filename)));
+        selectedImg.classList.add('selected');
+    }
+
+    const lastResizedImageUrl = localStorage.getItem('lastResizedImageUrl');
+    if (lastResizedImageUrl) {
+        lastResizedImageLink.href = lastResizedImageUrl;
+        lastResizedImageLink.textContent = lastResizedImageUrl;
     }
 });

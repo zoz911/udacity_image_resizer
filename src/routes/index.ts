@@ -26,12 +26,11 @@ router.post('/resize', upload.single('image'), async (req: Request, res: Respons
     }
 
     const originalFilename = path.parse(req.file.originalname).name;
-    const newFilename = `${originalFilename}-${width}_${height}.jpg`;
-    const outputPath = path.join(resizedDir, newFilename);
+    const outputPath = path.join(resizedDir, `${originalFilename}.jpg`);
 
     try {
-        await resizeImage(req.file.path, outputPath, width, height);
-        const resizedImagePath = `/resized/${newFilename}`;
+        const resizedFilename = await resizeImage(req.file.path, outputPath, width, height);
+        const resizedImagePath = `/resized/${resizedFilename}`;
         res.status(200).json({ message: 'Image resized successfully.', resizedImagePath });
     } catch (error) {
         console.error(`Error resizing image: ${error}`);
@@ -57,7 +56,8 @@ router.get('/gallery', async (req: Request, res: Response) => {
 
         const images = files.map(file => {
             const { name, ext } = path.parse(file);
-            const [width, height] = name.split('_').slice(-2).map(num => parseInt(num));
+            const [filename, dimensions] = name.split('-');
+            const [width, height] = dimensions.split('x').map(num => parseInt(num));
             return {
                 path: path.join('resized', file),
                 filename: file,
@@ -77,7 +77,6 @@ router.get('/gallery', async (req: Request, res: Response) => {
     }
 });
 
-// Endpoint to get images
 router.get('/images', async (req: Request, res: Response) => {
     const { filename, width, height } = req.query;
 
@@ -104,7 +103,7 @@ router.get('/images', async (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Valid width and height parameters are required.' });
     }
 
-    const outputPath = path.join(resizedDir, `${filename}-${parsedWidth}_${parsedHeight}.jpg`);
+    const outputPath = path.join(resizedDir, `${filename}-${parsedWidth}x${parsedHeight}.jpg`);
 
     try {
         await resizeImage(inputPath, outputPath, parsedWidth, parsedHeight);

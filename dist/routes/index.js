@@ -25,11 +25,10 @@ router.post('/resize', multerConfig_1.default.single('image'), async (req, res) 
         return res.status(400).json({ error: 'Valid width and height parameters are required.' });
     }
     const originalFilename = path_1.default.parse(req.file.originalname).name;
-    const newFilename = `${originalFilename}-${width}_${height}.jpg`;
-    const outputPath = path_1.default.join(resizedDir, newFilename);
+    const outputPath = path_1.default.join(resizedDir, `${originalFilename}.jpg`);
     try {
-        await (0, imageProcessing_1.resizeImage)(req.file.path, outputPath, width, height);
-        const resizedImagePath = `/resized/${newFilename}`;
+        const resizedFilename = await (0, imageProcessing_1.resizeImage)(req.file.path, outputPath, width, height);
+        const resizedImagePath = `/resized/${resizedFilename}`;
         res.status(200).json({ message: 'Image resized successfully.', resizedImagePath });
     }
     catch (error) {
@@ -52,7 +51,8 @@ router.get('/gallery', async (req, res) => {
         }
         const images = files.map(file => {
             const { name, ext } = path_1.default.parse(file);
-            const [width, height] = name.split('_').slice(-2).map(num => parseInt(num));
+            const [filename, dimensions] = name.split('-');
+            const [width, height] = dimensions.split('x').map(num => parseInt(num));
             return {
                 path: path_1.default.join('resized', file),
                 filename: file,
@@ -70,7 +70,6 @@ router.get('/gallery', async (req, res) => {
         res.status(500).json({ error: 'Error fetching gallery.' });
     }
 });
-// Endpoint to get images
 router.get('/images', async (req, res) => {
     const { filename, width, height } = req.query;
     if (!filename) {
@@ -91,7 +90,7 @@ router.get('/images', async (req, res) => {
     if (isNaN(parsedWidth) || isNaN(parsedHeight) || parsedWidth <= 0 || parsedHeight <= 0) {
         return res.status(400).json({ error: 'Valid width and height parameters are required.' });
     }
-    const outputPath = path_1.default.join(resizedDir, `${filename}-${parsedWidth}_${parsedHeight}.jpg`);
+    const outputPath = path_1.default.join(resizedDir, `${filename}-${parsedWidth}x${parsedHeight}.jpg`);
     try {
         await (0, imageProcessing_1.resizeImage)(inputPath, outputPath, parsedWidth, parsedHeight);
         res.sendFile(outputPath);

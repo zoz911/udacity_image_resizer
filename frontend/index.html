@@ -10,20 +10,23 @@
     <h1>Image Resizer</h1>
 
     <form id="resizeForm">
-        <input type="file" name="image" accept="image/jpeg" required>
-        <input type="number" name="width" placeholder="Width" required>
-        <input type="number" name="height" placeholder="Height" required>
+        <input type="file" name="image" id="resizeImageInput" accept="image/jpeg" required>
+        <input type="number" name="width" id="widthInput" placeholder="Width" required>
+        <input type="number" name="height" id="heightInput" placeholder="Height" required>
         <button type="submit">Resize</button>
     </form>
 
     <form id="uploadForm">
-        <input type="file" name="image" accept="image/jpeg" required>
+        <input type="file" name="image" id="uploadImageInput" accept="image/jpeg" required>
         <button type="submit">Upload New Image</button>
     </form>
 
     <div id="resizedImages"></div>
     <div id="gallery"></div>
     <div id="imageUrl"></div>
+    <div id="lastResizedImageUrl">
+        <p>Last Resized Image: <a id="lastResizedImageLink" href="#" target="_blank">No image yet</a></p>
+    </div>
 
     <script src="script.js"></script>
 </body>
