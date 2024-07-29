@@ -5,7 +5,7 @@ import { resizeImage } from '../utils/imageProcessing';
 const uploadsDir = path.resolve('uploads');
 const resizedDir = path.resolve('resized');
 const testImagePath = path.join(uploadsDir, 'test.jpg');
-const validTestImagePath = path.resolve(__dirname, '../../uploads/test.jpg');
+const validTestImagePath = path.resolve(__dirname, '../../uploads/foo.jpg');
 
 beforeAll(async () => {
     await fs.mkdir(uploadsDir, { recursive: true });
@@ -16,7 +16,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    const resizedFilePath = path.join(resizedDir, 'test-199_199.jpg');
+    const resizedFilePath = path.join(resizedDir, 'test-1000x1000-1000x1000.jpg');
 
     await fs.unlink(testImagePath).catch(() => { /* ignore */ });
     await fs.unlink(resizedFilePath).catch(() => { /* ignore */ });
@@ -25,7 +25,7 @@ afterAll(async () => {
 describe('Test image processing via sharp', () => {
     it('raises an error (invalid width value)', async () => {
         try {
-            await resizeImage(testImagePath, 'output.jpg', -100, 100);
+            await resizeImage(testImagePath, path.join(resizedDir, 'output.jpg'), -100, 100);
         } catch (error) {
             expect(error).toBeTruthy();
         }
@@ -33,15 +33,16 @@ describe('Test image processing via sharp', () => {
 
     it('raises an error (filename does not exist)', async () => {
         try {
-            await resizeImage('nonexistent.jpg', 'output.jpg', 100, 100);
+            await resizeImage('nonexistent.jpg', path.join(resizedDir, 'output.jpg'), 100, 100);
         } catch (error) {
             expect(error).toBeTruthy();
         }
     });
 
     it('succeeds to write resized thumb file (existing file, valid size values)', async () => {
-        await resizeImage(testImagePath, path.join(resizedDir, 'test-199_199.jpg'), 199, 199);
-        const fileExists = await fs.access(path.join(resizedDir, 'test-199_199.jpg')).then(() => true).catch(() => false);
+        const outputFilename = await resizeImage(testImagePath, path.join(resizedDir, 'test.jpg'), 1000, 1000);
+        const outputPath = path.join(resizedDir, outputFilename);
+        const fileExists = await fs.access(outputPath).then(() => true).catch(() => false);
         expect(fileExists).toBe(true);
     });
 });

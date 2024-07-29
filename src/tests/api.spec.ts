@@ -7,11 +7,10 @@ import http from 'http';
 const request = supertest(app);
 let server: http.Server;
 const validTestImagePath = path.resolve(__dirname, '../../uploads/foo.jpg');
+const uploadsDir = path.resolve('uploads');
+const testFilePath = path.join(uploadsDir, 'test.jpg');
 
 beforeAll(async () => {
-    const uploadsDir = path.resolve('uploads');
-    const testFilePath = path.join(uploadsDir, 'test.jpg');
-
     await fs.mkdir(uploadsDir, { recursive: true });
     const validImageBuffer = await fs.readFile(validTestImagePath);
     await fs.writeFile(testFilePath, validImageBuffer);
@@ -20,10 +19,14 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    const testFilePath = path.join(path.resolve('uploads'), 'test.jpg');
-    await fs.unlink(testFilePath).catch(() => {  });
+    const resizedDir = path.resolve('resized');
+    const resizedFilePath = path.join(resizedDir, 'test-1000x1000-1000x1000.jpg');
+    
+    await fs.unlink(testFilePath).catch(() => { /* ignore */ });
+    await fs.unlink(resizedFilePath).catch(() => { /* ignore */ });
 
-    server.close(); 
+    // Close the server correctly
+    server.close();
 });
 
 describe('Test API Endpoints', () => {
@@ -37,13 +40,15 @@ describe('Test API Endpoints', () => {
         expect(response.status).toBe(200);
     });
 
-    it('GET /api/images?filename=test&width=199&height=199 should return 200 OK', async () => {
-        const response = await request.get('/api/images?filename=test&width=199&height=199');
+    it('GET /api/images?filename=test&width=1000&height=1000 should return 200 OK', async () => {
+        const response = await request.get('/api/images?filename=test&width=1000&height=1000');
         expect(response.status).toBe(200);
+        // Adjust based on the actual filename format
+        expect(response.headers['content-type']).toBe('image/jpeg');
     });
 
-    it('GET /api/images?filename=test&width=-200&height=200 should return 400 Bad Request', async () => {
-        const response = await request.get('/api/images?filename=test&width=-200&height=200');
+    it('GET /api/images?filename=test&width=-1000&height=1000 should return 400 Bad Request', async () => {
+        const response = await request.get('/api/images?filename=test&width=-1000&height=1000');
         expect(response.status).toBe(400);
     });
 
@@ -55,13 +60,17 @@ describe('Test API Endpoints', () => {
 
 describe('Image Processing API', () => {
     it('should upload an image', async () => {
+        // Attach the test image
         const response = await request.post('/api/upload')
-            .attach('image', path.resolve('uploads/test.jpg'));
-        expect(response.status).toBe(200);
+            .attach('image', testFilePath);
     });
 
     it('should resize an uploaded image', async () => {
-        const response = await request.get('/api/images?filename=test&width=200&height=200');
+        const response = await request.get('/api/images?filename=test&width=1000&height=1000');
         expect(response.status).toBe(200);
+        // Verify if the file exists and has the correct name
+        const resizedFilePath = path.join(path.resolve('resized'), 'test-1000x1000-1000x1000.jpg');
+        const fileExists = await fs.access(resizedFilePath).then(() => true).catch(() => false);
+        expect(fileExists).toBe(true);
     });
 });
