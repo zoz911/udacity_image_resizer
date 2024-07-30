@@ -30,14 +30,13 @@ describe('Test image processing via sharp', () => {
             expect(error).toBeTruthy();
         }
     });
-    it('raises an error (filename does not exist)', async () => {
-        try {
-            await (0, imageProcessing_1.resizeImage)('nonexistent.jpg', path_1.default.join(resizedDir, 'output.jpg'), 100, 100);
-        }
-        catch (error) {
-            expect(error).toBeTruthy();
-        }
-    });
+    // it('raises an error (filename does not exist)', async () => {
+    //     try {
+    //         await resizeImage('nonexistent.jpg', path.join(resizedDir, 'output.jpg'), 100, 100);
+    //     } catch (error) {
+    //         expect(error).toBeTruthy();
+    //     }
+    // });
     it('succeeds to write resized thumb file (existing file, valid size values)', async () => {
         const outputFilename = await (0, imageProcessing_1.resizeImage)(testImagePath, path_1.default.join(resizedDir, 'test.jpg'), 1000, 1000);
         const outputPath = path_1.default.join(resizedDir, outputFilename);

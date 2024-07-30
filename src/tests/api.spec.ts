@@ -58,7 +58,7 @@ describe('Test API Endpoints', () => {
 });
 
 describe('Image Processing API', () => {
-
+    
     it('should resize an uploaded image', async () => {
         const response = await request.get('/api/images?filename=test&width=1000&height=1000');
         expect(response.status).toBe(200);
