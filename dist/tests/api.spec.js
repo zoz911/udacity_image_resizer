@@ -9,14 +9,14 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = require("fs");
 const request = (0, supertest_1.default)(app_1.default);
 let server;
-const validTestImagePath = path_1.default.resolve(__dirname, '../../uploads/foo.jpg');
 const uploadsDir = path_1.default.resolve('uploads');
 const testFilePath = path_1.default.join(uploadsDir, 'test.jpg');
+const validTestImagePath = path_1.default.resolve(__dirname, '../../uploads/foo.jpg');
 beforeAll(async () => {
     await fs_1.promises.mkdir(uploadsDir, { recursive: true });
     const validImageBuffer = await fs_1.promises.readFile(validTestImagePath);
     await fs_1.promises.writeFile(testFilePath, validImageBuffer);
-    server = app_1.default.listen(3001); // Start server on a different port for testing
+    server = app_1.default.listen(3001);
 });
 afterAll(async () => {
     const resizedDir = path_1.default.resolve('resized');
@@ -38,7 +38,6 @@ describe('Test API Endpoints', () => {
     it('GET /api/images?filename=test&width=1000&height=1000 should return 200 OK', async () => {
         const response = await request.get('/api/images?filename=test&width=1000&height=1000');
         expect(response.status).toBe(200);
-        // Adjust based on the actual filename format
         expect(response.headers['content-type']).toBe('image/jpeg');
     });
     it('GET /api/images?filename=test&width=-1000&height=1000 should return 400 Bad Request', async () => {
@@ -52,24 +51,17 @@ describe('Test API Endpoints', () => {
 });
 describe('Image Processing API', () => {
     it('should upload an image', async () => {
-        // Attach the test image
         const response = await request.post('/api/upload')
             .attach('image', testFilePath);
-        // Log the response for debugging
-        console.log('Upload response:', response.body);
-        console.log('Response status:', response.status);
-        // Check for successful response
         expect(response.status).toBe(200);
-        // Verify the response content directly if expected
-        expect(response.body.message).toBeDefined(); // Adjust based on your actual response
-        // Verify if the file exists in the uploads directory
+        expect(response.body.message).toBe('Image uploaded successfully.');
+        // Verify the file exists in the uploads directory
         const fileExists = await fs_1.promises.access(testFilePath).then(() => true).catch(() => false);
         expect(fileExists).toBe(true);
     });
     it('should resize an uploaded image', async () => {
         const response = await request.get('/api/images?filename=test&width=1000&height=1000');
         expect(response.status).toBe(200);
-        // Verify if the file exists and has the correct name
         const resizedFilePath = path_1.default.join(path_1.default.resolve('resized'), 'test-1000x1000-1000x1000.jpg');
         const fileExists = await fs_1.promises.access(resizedFilePath).then(() => true).catch(() => false);
         expect(fileExists).toBe(true);

@@ -6,16 +6,16 @@ import http from 'http';
 
 const request = supertest(app);
 let server: http.Server;
-const validTestImagePath = path.resolve(__dirname, '../../uploads/foo.jpg');
 const uploadsDir = path.resolve('uploads');
 const testFilePath = path.join(uploadsDir, 'test.jpg');
+const validTestImagePath = path.resolve(__dirname, '../../uploads/foo.jpg');
 
 beforeAll(async () => {
     await fs.mkdir(uploadsDir, { recursive: true });
     const validImageBuffer = await fs.readFile(validTestImagePath);
     await fs.writeFile(testFilePath, validImageBuffer);
 
-    server = app.listen(3001); // Start server on a different port for testing
+    server = app.listen(3001); 
 });
 
 afterAll(async () => {
@@ -43,7 +43,6 @@ describe('Test API Endpoints', () => {
     it('GET /api/images?filename=test&width=1000&height=1000 should return 200 OK', async () => {
         const response = await request.get('/api/images?filename=test&width=1000&height=1000');
         expect(response.status).toBe(200);
-        // Adjust based on the actual filename format
         expect(response.headers['content-type']).toBe('image/jpeg');
     });
 
@@ -60,15 +59,21 @@ describe('Test API Endpoints', () => {
 
 describe('Image Processing API', () => {
     it('should upload an image', async () => {
-        // Attach the test image
         const response = await request.post('/api/upload')
             .attach('image', testFilePath);
+        
+        expect(response.status).toBe(200);
+        expect(response.body.message).toBe('Image uploaded successfully.');
+        
+        // Verify the file exists in the uploads directory
+        const fileExists = await fs.access(testFilePath).then(() => true).catch(() => false);
+        expect(fileExists).toBe(true);
     });
 
     it('should resize an uploaded image', async () => {
         const response = await request.get('/api/images?filename=test&width=1000&height=1000');
         expect(response.status).toBe(200);
-        // Verify if the file exists and has the correct name
+
         const resizedFilePath = path.join(path.resolve('resized'), 'test-1000x1000-1000x1000.jpg');
         const fileExists = await fs.access(resizedFilePath).then(() => true).catch(() => false);
         expect(fileExists).toBe(true);
