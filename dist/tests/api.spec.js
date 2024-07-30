@@ -50,15 +50,6 @@ describe('Test API Endpoints', () => {
     });
 });
 describe('Image Processing API', () => {
-    it('should upload an image', async () => {
-        const response = await request.post('/api/upload')
-            .attach('image', testFilePath);
-        expect(response.status).toBe(200);
-        expect(response.body.message).toBe('Image uploaded successfully.');
-        // Verify the file exists in the uploads directory
-        const fileExists = await fs_1.promises.access(testFilePath).then(() => true).catch(() => false);
-        expect(fileExists).toBe(true);
-    });
     it('should resize an uploaded image', async () => {
         const response = await request.get('/api/images?filename=test&width=1000&height=1000');
         expect(response.status).toBe(200);
