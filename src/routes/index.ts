@@ -47,6 +47,8 @@ router.post('/upload', upload.single('image'), async (req: Request, res: Respons
     res.status(200).json({ message: 'Image uploaded successfully.', imageUrl });
 });
 
+// gellery 
+
 router.get('/gallery', async (req: Request, res: Response) => {
     try {
         const files = await fs.readdir(resizedDir);

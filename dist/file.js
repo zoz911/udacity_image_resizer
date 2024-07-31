@@ -14,10 +14,10 @@ class File {
             await (0, sharp_1.default)(inputPath)
                 .resize(parseInt(width, 10), parseInt(height, 10))
                 .toFile(outputPath);
-            return null; // Success
+            return null;
         }
         catch (error) {
-            return 'Error processing image'; // Return an error message
+            return 'Error processing image';
         }
     }
 }

@@ -25,11 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const resizedImageUrl = `http://localhost:3000/resized/${encodeURIComponent(data.filename)}`;
 
             lastResizedImageLink.href = resizedImageUrl;
+
             lastResizedImageLink.textContent = `Image: ${data.filename} (${data.width}x${data.height})`;
             localStorage.setItem('lastResizedImageUrl', resizedImageUrl);
 
             fetchGallery();
         } catch (error) {
+            
             console.error('Error resizing image:', error);
             alert('Failed to resize image. Please try again.');
         }

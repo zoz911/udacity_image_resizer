@@ -23,7 +23,7 @@ afterAll(async () => {
     const resizedFilePath = path_1.default.join(resizedDir, 'test-1000x1000-1000x1000.jpg');
     await fs_1.promises.unlink(testFilePath).catch(() => { });
     await fs_1.promises.unlink(resizedFilePath).catch(() => { });
-    // Close the server correctly
+    // Close the server 
     server.close();
 });
 describe('Test API Endpoints', () => {

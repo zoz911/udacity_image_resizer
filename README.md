@@ -23,7 +23,7 @@ Your project will have folders like this:
 3. Install other needed programs: `npm install`
 4. Make folders for uploads and resized pictures: `mkdir -p uploads resized`
 5. Start the program: `npm start`
-6. Open your web browser to see it: [http://127.0.0.1:3001](http://127.0.0.1:3001) or [http://127.0.0.1:3000](http://127.0.0.1:3000)
+6. Open your web browser to see it: [http://127.0.0.1:3001\](http://127.0.0.1:3001)](http://127.0.0.1:3001/frontend/index.html) or [http://127.0.0.1:3000\](http://127.0.0.1:3000)](http://127.0.0.1:3001/frontend/index.html)
 
 ## Using the program:
 - Add a picture: Go to `/api/upload` and send the picture file
@@ -36,5 +36,5 @@ To check if everything works, use: `npm test`
 
 ## Remember:
 - Make sure the upload and resized folders are there.
-- The program runs on port 3000 or 3001.
+- The program runs on port 3000 or 300.
 - You can change pictures using Sharp.

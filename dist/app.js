@@ -26,16 +26,16 @@ ensureDirExists(uploadsDir);
 ensureDirExists(resizedDir);
 // CORS 
 app.use((0, cors_1.default)({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3001'],
+    origin: ['http://localhost:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3000'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type']
 }));
-// JSON Middleware
+// JSON Middlewares
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
-// Serve static files from uploads and resized directories
+// Serve static files
 app.use('/uploads', express_1.default.static(uploadsDir));
-// Routes
+// routes
 app.get('/', (req, res) => {
     res.status(200).send('Welcome to the Image Processing API');
 });
@@ -55,7 +55,7 @@ app.post('/upload', multerConfig_1.default.single('image'), (req, res) => {
     }
     res.status(200).json({ message: 'File uploaded successfully', file: req.file });
 });
-// Server-side resize endpoint
+// Server-side resize 
 app.post('/api/resize', multerConfig_1.default.single('image'), async (req, res) => {
     const { width, height } = req.body;
     const { file } = req;
@@ -74,7 +74,6 @@ app.post('/api/resize', multerConfig_1.default.single('image'), async (req, res)
         res.status(500).json({ error: 'Failed to resize image' });
     }
 });
-// Dynamic route to serve resized images
 app.get('/resized/:filename', async (req, res) => {
     const { filename } = req.params;
     const decodedFilename = decodeURIComponent(filename);
@@ -89,7 +88,7 @@ app.get('/resized/:filename', async (req, res) => {
     }
 });
 app.use('/api', index_1.default);
-// Error handling middleware
+// Error handling
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ error: 'Internal Server Error' });

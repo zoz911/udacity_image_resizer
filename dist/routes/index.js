@@ -43,6 +43,7 @@ router.post('/upload', multerConfig_1.default.single('image'), async (req, res) 
     const imageUrl = `/uploads/${req.file.filename}`;
     res.status(200).json({ message: 'Image uploaded successfully.', imageUrl });
 });
+// gellery 
 router.get('/gallery', async (req, res) => {
     try {
         const files = await promises_1.default.readdir(resizedDir);

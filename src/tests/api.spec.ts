@@ -22,10 +22,10 @@ afterAll(async () => {
     const resizedDir = path.resolve('resized');
     const resizedFilePath = path.join(resizedDir, 'test-1000x1000-1000x1000.jpg');
     
-    await fs.unlink(testFilePath).catch(() => { /* ignore */ });
-    await fs.unlink(resizedFilePath).catch(() => { /* ignore */ });
+    await fs.unlink(testFilePath).catch(() => {  });
+    await fs.unlink(resizedFilePath).catch(() => {  });
 
-    // Close the server correctly
+    // Close the server 
     server.close();
 });
 
