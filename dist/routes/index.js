@@ -25,9 +25,16 @@ router.post('/resize', multerConfig_1.default.single('image'), async (req, res) 
         return res.status(400).json({ error: 'Valid width and height parameters are required.' });
     }
     const originalFilename = path_1.default.parse(req.file.originalname).name;
-    const outputPath = path_1.default.join(resizedDir, `${originalFilename}.jpg`);
+    const resizedFilename = `${originalFilename}-${width}x${height}.jpg`;
+    const outputPath = path_1.default.join(resizedDir, resizedFilename);
     try {
-        const resizedFilename = await (0, imageProcessing_1.resizeImage)(req.file.path, outputPath, width, height);
+        // Check if the resized image already exists
+        try {
+            await promises_1.default.access(outputPath);
+            return res.status(400).json({ error: 'Image already resized with these dimensions.' });
+        }
+        catch { }
+        await (0, imageProcessing_1.resizeImage)(req.file.path, outputPath, width, height);
         const resizedImagePath = `/resized/${resizedFilename}`;
         res.status(200).json({ message: 'Image resized successfully.', resizedImagePath });
     }
@@ -43,7 +50,6 @@ router.post('/upload', multerConfig_1.default.single('image'), async (req, res) 
     const imageUrl = `/uploads/${req.file.filename}`;
     res.status(200).json({ message: 'Image uploaded successfully.', imageUrl });
 });
-// gellery 
 router.get('/gallery', async (req, res) => {
     try {
         const files = await promises_1.default.readdir(resizedDir);
@@ -51,7 +57,7 @@ router.get('/gallery', async (req, res) => {
             return res.status(200).json([]);
         }
         const images = files.map(file => {
-            const { name, ext } = path_1.default.parse(file);
+            const { name } = path_1.default.parse(file);
             const [filename, dimensions] = name.split('-');
             const [width, height] = dimensions.split('x').map(num => parseInt(num));
             return {
@@ -61,9 +67,7 @@ router.get('/gallery', async (req, res) => {
                 height
             };
         });
-        const lastResizedImage = images.sort((a, b) => {
-            return b.filename.localeCompare(a.filename);
-        })[0];
+        const lastResizedImage = images.sort((a, b) => b.filename.localeCompare(a.filename))[0];
         res.status(200).json({ gallery: images, lastResizedImage });
     }
     catch (error) {
@@ -91,9 +95,16 @@ router.get('/images', async (req, res) => {
     if (isNaN(parsedWidth) || isNaN(parsedHeight) || parsedWidth <= 0 || parsedHeight <= 0) {
         return res.status(400).json({ error: 'Valid width and height parameters are required.' });
     }
-    const outputPath = path_1.default.join(resizedDir, `${filename}-${parsedWidth}x${parsedHeight}.jpg`);
+    const resizedFilename = `${filename}-${parsedWidth}x${parsedHeight}.jpg`;
+    const outputPath = path_1.default.join(resizedDir, resizedFilename);
     try {
-        await (0, imageProcessing_1.resizeImage)(inputPath, outputPath, parsedWidth, parsedHeight);
+        // Check if the resized image already exists
+        try {
+            await promises_1.default.access(outputPath);
+        }
+        catch {
+            await (0, imageProcessing_1.resizeImage)(inputPath, outputPath, parsedWidth, parsedHeight);
+        }
         res.sendFile(outputPath);
     }
     catch (error) {

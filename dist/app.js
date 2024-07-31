@@ -26,7 +26,7 @@ ensureDirExists(uploadsDir);
 ensureDirExists(resizedDir);
 // CORS 
 app.use((0, cors_1.default)({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3000'],
+    origin: '*',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type']
 }));

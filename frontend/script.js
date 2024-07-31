@@ -8,6 +8,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     resizeForm.addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        // Get width and height inputs
+        const widthInput = document.querySelector('#widthInput').value;
+        const heightInput = document.querySelector('#heightInput').value;
+
+        // Check if width and height are valid numbers
+        const width = parseInt(widthInput, 10);
+        const height = parseInt(heightInput, 10);
+        if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+            alert('Invalid width or height. Please enter positive numbers.');
+            return;
+        }
+
         const formData = new FormData(resizeForm);
         formData.append('filename', selectedImage);
 
@@ -22,16 +35,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.json();
-            const resizedImageUrl = `http://localhost:3000/resized/${encodeURIComponent(data.filename)}`;
+            if (data.error) {
+                alert(data.error);
+            } else {
+                const resizedImageUrl = `http://localhost:3000/resized/${encodeURIComponent(data.filename)}`;
 
-            lastResizedImageLink.href = resizedImageUrl;
+                lastResizedImageLink.href = resizedImageUrl;
+                lastResizedImageLink.textContent = `Image: ${data.filename} (${data.width}x${data.height})`;
+                localStorage.setItem('lastResizedImageUrl', resizedImageUrl);
 
-            lastResizedImageLink.textContent = `Image: ${data.filename} (${data.width}x${data.height})`;
-            localStorage.setItem('lastResizedImageUrl', resizedImageUrl);
-
-            fetchGallery();
+                fetchGallery();
+            }
         } catch (error) {
-            
             console.error('Error resizing image:', error);
             alert('Failed to resize image. Please try again.');
         }

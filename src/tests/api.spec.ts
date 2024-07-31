@@ -63,7 +63,7 @@ describe('Image Processing API', () => {
         const response = await request.get('/api/images?filename=test&width=1000&height=1000');
         expect(response.status).toBe(200);
 
-        const resizedFilePath = path.join(path.resolve('resized'), 'test-1000x1000-1000x1000.jpg');
+        const resizedFilePath = path.join(path.resolve('resized'), 'test-1000x1000.jpg');
         const fileExists = await fs.access(resizedFilePath).then(() => true).catch(() => false);
         expect(fileExists).toBe(true);
     });
