@@ -9,7 +9,7 @@ import { resizeImage } from './utils/imageProcessing';
 const app = express();
 const PORT = 3000;
 
-// Ensure directories exist
+
 const uploadsDir = path.join(__dirname, '../uploads');
 const resizedDir = path.join(__dirname, '../resized');
 
@@ -24,14 +24,14 @@ const ensureDirExists = async (dir: string) => {
 ensureDirExists(uploadsDir);
 ensureDirExists(resizedDir);
 
-// CORS Middleware
+// CORS 
 app.use(cors({
     origin: ['http://localhost:3000', 'http://127.0.0.1:3001'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type']
 }));
 
-// JSON and URL-encoded Middleware
+// JSON Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

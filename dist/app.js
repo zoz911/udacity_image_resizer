@@ -12,7 +12,6 @@ const multerConfig_1 = __importDefault(require("./multerConfig"));
 const imageProcessing_1 = require("./utils/imageProcessing");
 const app = (0, express_1.default)();
 const PORT = 3000;
-// Ensure directories exist
 const uploadsDir = path_1.default.join(__dirname, '../uploads');
 const resizedDir = path_1.default.join(__dirname, '../resized');
 const ensureDirExists = async (dir) => {
@@ -25,13 +24,13 @@ const ensureDirExists = async (dir) => {
 };
 ensureDirExists(uploadsDir);
 ensureDirExists(resizedDir);
-// CORS Middleware
+// CORS 
 app.use((0, cors_1.default)({
     origin: ['http://localhost:3000', 'http://127.0.0.1:3001'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type']
 }));
-// JSON and URL-encoded Middleware
+// JSON Middleware
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 // Serve static files from uploads and resized directories

@@ -19,14 +19,15 @@
     "@types/jasmine": "^5.1.4",
     "@types/multer": "^1.4.11",
     "@types/node": "^20.14.10",
+    "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^7.15.0",
     "@typescript-eslint/parser": "^7.15.0",
     "eslint": "^8.57.0",
     "jasmine": "^5.2.0",
     "jasmine-spec-reporter": "^6.0.0",
+    "supertest": "^6.3.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.3",
-    "supertest": "^6.3.3"
+    "typescript": "^5.5.3"
   },
   "dependencies": {
     "axios": "^1.7.2",
