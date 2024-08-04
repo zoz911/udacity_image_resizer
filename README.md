@@ -38,3 +38,4 @@ To check if everything works, use: `npm test`
 - Make sure the upload and resized folders are there.
 - The program runs on port 3000 or 300.
 - You can change pictures using Sharp.
+- please Read the changes.txt that in the main root 
