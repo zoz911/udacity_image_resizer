@@ -11,6 +11,7 @@
 
     <form id="resizeForm">
         <input type="file" name="image" id="resizeImageInput" accept="image/jpeg" required>
+        <input type="hidden" id="selectedImage" name="selectedImage"> <!-- Hidden input for selected image -->
         <input type="number" name="width" id="widthInput" placeholder="Width" required>
         <input type="number" name="height" id="heightInput" placeholder="Height" required>
         <button type="submit">Resize</button>
@@ -21,7 +22,6 @@
         <button type="submit">Upload New Image</button>
     </form>
 
-    <div id="resizedImages"></div>
     <div id="gallery"></div>
     <div id="imageUrl"></div>
     <div id="lastResizedImageUrl">

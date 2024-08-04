@@ -9,11 +9,11 @@ import { resizeImage } from './utils/imageProcessing';
 const app = express();
 const PORT = 3000;
 
-
 const uploadsDir = path.join(__dirname, '../uploads');
 const resizedDir = path.join(__dirname, '../resized');
 
-const ensureDirExists = async (dir: string) => {
+// Ensure directory exists
+const ensureDirExists = async (dir: string): Promise<void> => {
     try {
         await fs.mkdir(dir, { recursive: true });
     } catch (err) {
@@ -24,26 +24,26 @@ const ensureDirExists = async (dir: string) => {
 ensureDirExists(uploadsDir);
 ensureDirExists(resizedDir);
 
-// CORS 
+// CORS Configuration
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type']
 }));
 
-// JSON Middlewares
+// JSON Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files
 app.use('/uploads', express.static(uploadsDir));
 
-// routes
-app.get('/', (req: Request, res: Response) => {
+// Routes
+app.get('/', (req: Request, res: Response): void => {
     res.status(200).send('Welcome to the Image Processing API');
 });
 
-app.get('/api/gallery', async (req, res) => {
+app.get('/api/gallery', async (req: Request, res: Response): Promise<void> => {
     try {
         const images = await getImagesFromDirectory(resizedDir);
         res.json(images);
@@ -53,20 +53,22 @@ app.get('/api/gallery', async (req, res) => {
     }
 });
 
-app.post('/upload', multerConfig.single('image'), (req: Request, res: Response) => {
+app.post('/upload', multerConfig.single('image'), (req: Request, res: Response): void => {
     if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
+        res.status(400).json({ error: 'No file uploaded' });
+        return;
     }
     res.status(200).json({ message: 'File uploaded successfully', file: req.file });
 });
 
-// Server-side resize 
-app.post('/api/resize', multerConfig.single('image'), async (req: Request, res: Response) => {
+// Server-side resize
+app.post('/api/resize', multerConfig.single('image'), async (req: Request, res: Response): Promise<void> => {
     const { width, height } = req.body;
     const { file } = req;
 
     if (!file) {
-        return res.status(400).json({ error: 'Image file is required' });
+        res.status(400).json({ error: 'Image file is required' });
+        return;
     }
 
     const inputFile = path.join(uploadsDir, file.filename);
@@ -75,7 +77,7 @@ app.post('/api/resize', multerConfig.single('image'), async (req: Request, res: 
     console.log(`Resizing image: input=${inputFile}, output=${outputFile}, width=${width}, height=${height}`);
 
     try {
-        const outputFilename = await resizeImage(inputFile, outputFile, parseInt(width), parseInt(height));
+        const outputFilename = await resizeImage(inputFile, outputFile, parseInt(width, 10), parseInt(height, 10));
         res.json({ filename: outputFilename, width, height });
     } catch (error) {
         console.error('Error resizing image:', error);
@@ -83,7 +85,7 @@ app.post('/api/resize', multerConfig.single('image'), async (req: Request, res: 
     }
 });
 
-app.get('/resized/:filename', async (req: Request, res: Response) => {
+app.get('/resized/:filename', async (req: Request, res: Response): Promise<void> => {
     const { filename } = req.params;
     const decodedFilename = decodeURIComponent(filename);
     const filePath = path.join(resizedDir, decodedFilename);
@@ -100,20 +102,19 @@ app.get('/resized/:filename', async (req: Request, res: Response) => {
 app.use('/api', indexRouter);
 
 // Error handling
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
     console.error(err.stack);
     res.status(500).json({ error: 'Internal Server Error' });
 });
 
 // Start the server
-app.listen(PORT, () => {
+app.listen(PORT, (): void => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
 
 export default app;
 
-// Utility function to get images from the directory
-const getImagesFromDirectory = async (dir: string) => {
+const getImagesFromDirectory = async (dir: string): Promise<{ filename: string, path: string }[]> => {
     try {
         const files = await fs.readdir(dir);
         return files.map(file => ({ filename: file, path: path.join('resized', file) }));

@@ -14,6 +14,7 @@ const app = (0, express_1.default)();
 const PORT = 3000;
 const uploadsDir = path_1.default.join(__dirname, '../uploads');
 const resizedDir = path_1.default.join(__dirname, '../resized');
+// Ensure directory exists
 const ensureDirExists = async (dir) => {
     try {
         await promises_1.default.mkdir(dir, { recursive: true });
@@ -24,18 +25,18 @@ const ensureDirExists = async (dir) => {
 };
 ensureDirExists(uploadsDir);
 ensureDirExists(resizedDir);
-// CORS 
+// CORS Configuration
 app.use((0, cors_1.default)({
     origin: '*',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type']
 }));
-// JSON Middlewares
+// JSON Middleware
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 // Serve static files
 app.use('/uploads', express_1.default.static(uploadsDir));
-// routes
+// Routes
 app.get('/', (req, res) => {
     res.status(200).send('Welcome to the Image Processing API');
 });
@@ -51,22 +52,24 @@ app.get('/api/gallery', async (req, res) => {
 });
 app.post('/upload', multerConfig_1.default.single('image'), (req, res) => {
     if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
+        res.status(400).json({ error: 'No file uploaded' });
+        return;
     }
     res.status(200).json({ message: 'File uploaded successfully', file: req.file });
 });
-// Server-side resize 
+// Server-side resize
 app.post('/api/resize', multerConfig_1.default.single('image'), async (req, res) => {
     const { width, height } = req.body;
     const { file } = req;
     if (!file) {
-        return res.status(400).json({ error: 'Image file is required' });
+        res.status(400).json({ error: 'Image file is required' });
+        return;
     }
     const inputFile = path_1.default.join(uploadsDir, file.filename);
     const outputFile = path_1.default.join(resizedDir, file.filename);
     console.log(`Resizing image: input=${inputFile}, output=${outputFile}, width=${width}, height=${height}`);
     try {
-        const outputFilename = await (0, imageProcessing_1.resizeImage)(inputFile, outputFile, parseInt(width), parseInt(height));
+        const outputFilename = await (0, imageProcessing_1.resizeImage)(inputFile, outputFile, parseInt(width, 10), parseInt(height, 10));
         res.json({ filename: outputFilename, width, height });
     }
     catch (error) {
@@ -98,7 +101,6 @@ app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
 exports.default = app;
-// Utility function to get images from the directory
 const getImagesFromDirectory = async (dir) => {
     try {
         const files = await promises_1.default.readdir(dir);

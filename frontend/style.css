@@ -1,5 +1,3 @@
-/* style.css */
-
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -68,6 +66,12 @@ h2 {
     max-height: 150px; /* Reduced height for thumbnails */
     border-radius: 8px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+#gallery img.selected {
+    border: 2px solid #007bff;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
 }
 
 #resizedImages {
@@ -82,4 +86,13 @@ h2 {
     height: auto;
     border-radius: 8px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+.thumbnail {
+    cursor: pointer;
+    border: 2px solid transparent;
+    margin: 5px;
+}
+
+.thumbnail.selected {
+    border-color: blue;
 }

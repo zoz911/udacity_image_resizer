@@ -3,17 +3,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadForm = document.querySelector('#uploadForm');
     const galleryContainer = document.querySelector('#gallery');
     const lastResizedImageLink = document.querySelector('#lastResizedImageLink');
+    const resizeImageInput = document.querySelector('#resizeImageInput');
+    const selectedImageInput = document.querySelector('#selectedImage');
 
-    let selectedImage = null;
+    let selectedImageFilename = null;
+    let selectedImageBlob = null;
 
+    // Handle form submission for resizing
     resizeForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        // Get width and height inputs
         const widthInput = document.querySelector('#widthInput').value;
         const heightInput = document.querySelector('#heightInput').value;
 
-        // Check if width and height are valid numbers
         const width = parseInt(widthInput, 10);
         const height = parseInt(heightInput, 10);
         if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
@@ -21,8 +23,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const formData = new FormData(resizeForm);
-        formData.append('filename', selectedImage);
+        if (!resizeImageInput.files.length && !selectedImageBlob) {
+            alert('Please select an image from the gallery or upload a new one.');
+            return;
+        }
+
+        const formData = new FormData();
+        if (selectedImageBlob) {
+            formData.append('image', selectedImageBlob, selectedImageFilename);
+        } else {
+            formData.append('image', resizeImageInput.files[0]);
+        }
+        formData.append('width', width);
+        formData.append('height', height);
 
         try {
             const response = await fetch('http://localhost:3000/api/resize', {
@@ -52,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Handle form submission for uploading
     uploadForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const formData = new FormData(uploadForm);
@@ -76,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Function to fetch and display images in the gallery
     async function fetchGallery() {
         try {
             const response = await fetch('http://localhost:3000/api/gallery');
@@ -100,27 +115,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    fetchGallery();
-
+    // Function to add an image to the gallery
     function addImageToGallery(filename) {
         const gallery = document.getElementById('gallery');
         const img = document.createElement('img');
         img.src = `http://localhost:3000/uploads/${encodeURIComponent(filename)}`;
+        img.classList.add('thumbnail');
         img.onclick = () => selectImage(filename);
         gallery.appendChild(img);
     }
 
+    // Function to select an image from the gallery
     function selectImage(filename) {
-        selectedImage = filename;
+        selectedImageFilename = filename;
+
+        // Highlight the selected image
         const images = document.querySelectorAll('#gallery img');
         images.forEach((img) => img.classList.remove('selected'));
         const selectedImg = Array.from(images).find((img) => img.src.includes(encodeURIComponent(filename)));
-        selectedImg.classList.add('selected');
+        if (selectedImg) {
+            selectedImg.classList.add('selected');
+        }
+
+        // Fetch the selected image file from the server
+        fetch(`http://localhost:3000/resized/${encodeURIComponent(filename)}`)
+            .then(response => response.blob())
+            .then(blob => {
+                selectedImageBlob = blob;
+                const file = new File([blob], filename, { type: 'image/jpeg' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                resizeImageInput.files = dataTransfer.files;
+            })
+            .catch(error => console.error('Error fetching image blob:', error));
+
+        // Update the hidden input with the selected image filename
+        selectedImageInput.value = filename;
     }
 
+    // Handle URL of last resized image
     const lastResizedImageUrl = localStorage.getItem('lastResizedImageUrl');
     if (lastResizedImageUrl) {
         lastResizedImageLink.href = lastResizedImageUrl;
         lastResizedImageLink.textContent = lastResizedImageUrl;
     }
+
+    // Initial gallery load
+    fetchGallery();
 });
