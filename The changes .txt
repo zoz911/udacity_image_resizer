@@ -1,3 +1,18 @@
+// what i do to fix the problems: 
+in app.ts: 
+
+Added Type Annotations: For all function parameters and return types.
+Enhanced Error Handling: Specified return types and improved error handling practices.
+Corrected parseInt Calls: Added radix parameter to ensure proper number parsing.
+Specified Return Type for Utility Functions: Added return types to async utility functions.
+
+------------------------
+and i made the user able to click an already exist image to select it for resizing, and i made some animations for thumbnail
+
+
+########################################################################################
+########################################################################################
+
 src/app.ts: 
 ____________________________________
 Old:
